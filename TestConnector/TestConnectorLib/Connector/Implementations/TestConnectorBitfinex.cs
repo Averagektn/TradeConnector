@@ -228,6 +228,7 @@ public class TestConnectorBitfinex : ITestConnector, ITickerConnector
     }
 
     private readonly Dictionary<string, ClientWebSocket> _subscribedTradePairs = [];
+    // Ws could be used to repeat requests
     public async void SubscribeTrades(string pair, int maxCount = 100)
     {
         if (_subscribedTradePairs.ContainsKey(pair))

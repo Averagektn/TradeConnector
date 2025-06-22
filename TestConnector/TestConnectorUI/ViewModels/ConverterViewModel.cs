@@ -48,4 +48,21 @@ public class ConverterViewModel : BaseViewModel
             Trades.Add(trade);
         });
     }
+
+    private bool _isDisposed = false;
+    public override void Dispose()
+    {
+        if (!_isDisposed)
+        {
+            base.Dispose();
+
+            GC.SuppressFinalize(this);
+
+            _testConnector.NewBuyTrade -= UpdateTrades;
+            _testConnector.NewSellTrade -= UpdateTrades;
+            _testConnector.UnsubscribeTrades("tBTCUSD");
+
+            _isDisposed = true;
+        }
+    }
 }
