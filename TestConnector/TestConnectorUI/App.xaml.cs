@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using TestConnectorLib.Connector.Implementations;
 using TestConnectorLib.Connector.Interfaces;
+using TestConnectorLib.Converter.Implementations;
+using TestConnectorLib.Converter.Interfaces;
 
 using TestConnectorUI.Navigation;
 using TestConnectorUI.ViewModels;
@@ -30,7 +32,8 @@ public partial class App : Application
         );
         _ = services.AddSingleton<NavigationStore>();
 
-        _ = services.AddTransient<ITestConnector, TestConnectorBitfinex>();
+        _ = services.AddSingleton<ITestConnector, TestConnectorBitfinex>();
+        _ = services.AddSingleton<ICurrencyConverter, BitfinexCurrencyConverter>();
 
         _ = services.AddTransient<MainViewModel>();
         _ = services.AddTransient<ConverterViewModel>();

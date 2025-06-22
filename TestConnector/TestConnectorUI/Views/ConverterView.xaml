@@ -44,6 +44,7 @@
                     <DataGridTextColumn Header="Xmr" Binding="{Binding Xmr}"/>
                     <DataGridTextColumn Header="Xrp" Binding="{Binding Xrp}"/>
                     <DataGridTextColumn Header="Dash" Binding="{Binding Dash}"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding Total}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </StackPanel>

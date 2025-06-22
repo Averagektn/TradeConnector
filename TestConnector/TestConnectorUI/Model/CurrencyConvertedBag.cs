@@ -6,4 +6,5 @@ public class CurrencyConvertedBag
     public decimal Xmr { get; set; }
     public decimal Xrp { get; set; }
     public decimal Dash { get; set; }
+    public decimal Total { get; set; }
 }

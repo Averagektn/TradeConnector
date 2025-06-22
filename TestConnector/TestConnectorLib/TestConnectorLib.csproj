@@ -10,9 +10,4 @@
     <PackageReference Include="RestSharp" Version="112.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Converter\Interfaces\" />
-    <Folder Include="Converter\Implementations\" />
-  </ItemGroup>
-
 </Project>
