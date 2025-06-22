@@ -102,7 +102,7 @@ public class TestConnectorBitfinex : ITestConnector
 
             foreach (JsonArray item in data)
             {
-                Trade trade = GetTradeFronJson(item, pair);
+                Trade trade = GetTradeFromJson(item, pair);
 
                 res.Add(trade);
 
@@ -227,9 +227,101 @@ public class TestConnectorBitfinex : ITestConnector
     }
 
     private readonly Dictionary<string, ClientWebSocket> _subscribedTradePairs = [];
-    public void SubscribeTrades(string pair, int maxCount = 100)
+    public async void SubscribeTrades(string pair, int maxCount = 100)
     {
-        throw new NotImplementedException();
+        if (_subscribedTradePairs.ContainsKey(pair))
+        {
+            return;
+        }
+
+        var message = new
+        {
+            @event = "subscribe",
+            channel = "trades",
+            symbol = pair,
+        };
+        var wsUri = new Uri("wss://api-pub.bitfinex.com/ws/2");
+
+        var ws = new ClientWebSocket();
+        try
+        {
+            await ws.ConnectAsync(wsUri, CancellationToken.None);
+        }
+        catch (OperationCanceledException)
+        {
+            ws.Dispose();
+            return;
+        }
+
+        string jsonMessage = JsonSerializer.Serialize(message);
+        byte[] sendBuffer = Encoding.UTF8.GetBytes(jsonMessage);
+        try
+        {
+            await ws.SendAsync(new ArraySegment<byte>(sendBuffer), WebSocketMessageType.Text, true,
+    CancellationToken.None);
+        }
+        catch (InvalidOperationException)
+        {
+            ws.Dispose();
+            return;
+        }
+
+        byte[] buffer = new byte[1024];
+        var messageBuilder = new StringBuilder();
+
+        _ = Task.Run(async () =>
+        {
+            _subscribedTradePairs.Add(pair, ws);
+            while (ws.State == WebSocketState.Open)
+            {
+                try
+                {
+                    WebSocketReceiveResult result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                    string chunk = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    messageBuilder.Append(chunk);
+
+                    if (result.EndOfMessage)
+                    {
+                        string fullMessage = messageBuilder.ToString();
+                        messageBuilder.Clear();
+
+                        JsonNode node = JsonSerializer.Deserialize<JsonNode>(fullMessage)!;
+
+                        if (node is JsonArray response)
+                        {
+                            if (response.Count >= 2 && response[1] is JsonArray tradesArray)
+                            {
+                                foreach (JsonNode? tradeNode in tradesArray)
+                                {
+                                    if (tradeNode is JsonArray tradeItem)
+                                    {
+                                        Trade trade = GetTradeFromJson(tradeItem, pair);
+                                        if (trade.Side == BuySide)
+                                        {
+                                            NewBuyTrade?.Invoke(trade);
+                                        }
+                                        else if (trade.Side == SellSide)
+                                        {
+                                            NewSellTrade?.Invoke(trade);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
+                    _subscribedTradePairs.Remove(pair);
+                }
+                catch (InvalidOperationException)
+                {
+                    ws.Dispose();
+                    _subscribedTradePairs.Remove(pair);
+                }
+            }
+        });
     }
 
     public void UnsubscribeTrades(string pair)
@@ -267,13 +359,16 @@ public class TestConnectorBitfinex : ITestConnector
         return candle;
     }
 
-    private static Trade GetTradeFronJson(JsonArray json, string pair)
+    public const string BuySide = "BUY";
+    public const string SellSide = "SELL";
+
+    private static Trade GetTradeFromJson(JsonArray json, string pair)
     {
         long id = json[0]!.GetValue<long>();
         long mts = json[1]!.GetValue<long>();
         double amount = json[2]!.GetValue<double>();
         double price = json[3]!.GetValue<double>();
-        string side = amount >= 0 ? "BUY" : "SELL";
+        string side = amount >= 0 ? BuySide : SellSide;
 
         var trade = new Trade()
         {
