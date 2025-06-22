@@ -86,6 +86,7 @@ public class TestConnectorBitfinex : ITestConnector
                     OpenTime = DateTimeOffset.FromUnixTimeMilliseconds(item[0]!.GetValue<long>()),
                     Pair = pair,
                     TotalVolume = volume,
+                    // OCHL average
                     TotalPrice = volume * (openPrice + closePrice + highPrice + lowPrice) / 4,
                 };
 
@@ -98,9 +99,47 @@ public class TestConnectorBitfinex : ITestConnector
         throw new RequestFailedException($"Failed with {response.StatusCode} {response.ErrorMessage} {response.ErrorException}");
     }
 
-    public Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, int maxCount)
+    public async Task<IEnumerable<Trade>> GetNewTradesAsync(string pair, int maxCount)
     {
-        throw new NotImplementedException();
+        using var client = new RestClient("https://api-pub.bitfinex.com/v2");
+        RestRequest request = new RestRequest($"trades/{pair}/hist", Method.Get)
+            .AddHeader("Accept", "application/json")
+            .AddQueryParameter("limit", maxCount);
+
+        RestResponse response = await client.ExecuteAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            string json = response.Content!;
+
+            List<JsonArray> data = JsonSerializer.Deserialize<List<JsonArray>>(json)!;
+            List<Trade> res = new(data.Count);
+
+            foreach (JsonArray item in data)
+            {
+                long id = item[0]!.GetValue<long>();
+                long mts = item[1]!.GetValue<long>();
+                double amount = item[2]!.GetValue<double>();
+                double price = item[3]!.GetValue<double>();
+                string side = amount >= 0 ? "BUY" : "SELL";
+
+                var trade = new Trade()
+                {
+                    Amount = new decimal(amount),
+                    Id = id.ToString(),
+                    Pair = pair,
+                    Price = new decimal(price),
+                    Side = side,
+                    Time = DateTimeOffset.FromUnixTimeMilliseconds(mts),
+                };
+
+                res.Add(trade);
+
+                return res;
+            }
+        }
+
+        throw new RequestFailedException($"Failed with {response.StatusCode} {response.ErrorMessage} {response.ErrorException}");
     }
 
     #endregion
