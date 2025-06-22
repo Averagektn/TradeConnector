@@ -73,24 +73,7 @@ public class TestConnectorBitfinex : ITestConnector
 
             foreach (JsonArray item in data)
             {
-                int openPrice = item[1]!.GetValue<int>();
-                int closePrice = item[2]!.GetValue<int>();
-                int highPrice = item[3]!.GetValue<int>();
-                int lowPrice = item[4]!.GetValue<int>();
-                decimal volume = item[5]!.GetValue<decimal>();
-
-                var candle = new Candle()
-                {
-                    OpenPrice = openPrice,
-                    ClosePrice = closePrice,
-                    HighPrice = highPrice,
-                    LowPrice = lowPrice,
-                    OpenTime = DateTimeOffset.FromUnixTimeMilliseconds(item[0]!.GetValue<long>()),
-                    Pair = pair,
-                    TotalVolume = volume,
-                    // OCHL average
-                    TotalPrice = volume * (openPrice + closePrice + highPrice + lowPrice) / 4,
-                };
+                Candle candle = GetCandleFromJson(item, pair);
 
                 res.Add(candle);
 
@@ -119,21 +102,7 @@ public class TestConnectorBitfinex : ITestConnector
 
             foreach (JsonArray item in data)
             {
-                long id = item[0]!.GetValue<long>();
-                long mts = item[1]!.GetValue<long>();
-                double amount = item[2]!.GetValue<double>();
-                double price = item[3]!.GetValue<double>();
-                string side = amount >= 0 ? "BUY" : "SELL";
-
-                var trade = new Trade()
-                {
-                    Amount = new decimal(amount),
-                    Id = id.ToString(),
-                    Pair = pair,
-                    Price = new decimal(price),
-                    Side = side,
-                    Time = DateTimeOffset.FromUnixTimeMilliseconds(mts),
-                };
+                Trade trade = GetTradeFronJson(item, pair);
 
                 res.Add(trade);
 
@@ -226,24 +195,7 @@ public class TestConnectorBitfinex : ITestConnector
                                 {
                                     if (candleNode is JsonArray candleItem)
                                     {
-                                        int openPrice = candleItem[1]!.GetValue<int>();
-                                        int closePrice = candleItem[2]!.GetValue<int>();
-                                        int highPrice = candleItem[3]!.GetValue<int>();
-                                        int lowPrice = candleItem[4]!.GetValue<int>();
-                                        decimal volume = candleItem[5]!.GetValue<decimal>();
-
-                                        var candle = new Candle()
-                                        {
-                                            OpenPrice = openPrice,
-                                            ClosePrice = closePrice,
-                                            HighPrice = highPrice,
-                                            LowPrice = lowPrice,
-                                            OpenTime = DateTimeOffset.FromUnixTimeMilliseconds(candleItem[0]!.GetValue<long>()),
-                                            Pair = pair,
-                                            TotalVolume = volume,
-                                            // OCHL average
-                                            TotalPrice = volume * (openPrice + closePrice + highPrice + lowPrice) / 4,
-                                        };
+                                        Candle candle = GetCandleFromJson(candleItem, pair);
 
                                         CandleSeriesProcessing?.Invoke(candle);
                                     }
@@ -290,4 +242,49 @@ public class TestConnectorBitfinex : ITestConnector
     }
 
     #endregion
+
+    private static Candle GetCandleFromJson(JsonArray json, string pair)
+    {
+        int openPrice = json[1]!.GetValue<int>();
+        int closePrice = json[2]!.GetValue<int>();
+        int highPrice = json[3]!.GetValue<int>();
+        int lowPrice = json[4]!.GetValue<int>();
+        decimal volume = json[5]!.GetValue<decimal>();
+
+        var candle = new Candle()
+        {
+            OpenPrice = openPrice,
+            ClosePrice = closePrice,
+            HighPrice = highPrice,
+            LowPrice = lowPrice,
+            OpenTime = DateTimeOffset.FromUnixTimeMilliseconds(json[0]!.GetValue<long>()),
+            Pair = pair,
+            TotalVolume = volume,
+            // OCHL average
+            TotalPrice = volume * (openPrice + closePrice + highPrice + lowPrice) / 4,
+        };
+
+        return candle;
+    }
+
+    private static Trade GetTradeFronJson(JsonArray json, string pair)
+    {
+        long id = json[0]!.GetValue<long>();
+        long mts = json[1]!.GetValue<long>();
+        double amount = json[2]!.GetValue<double>();
+        double price = json[3]!.GetValue<double>();
+        string side = amount >= 0 ? "BUY" : "SELL";
+
+        var trade = new Trade()
+        {
+            Amount = new decimal(amount),
+            Id = id.ToString(),
+            Pair = pair,
+            Price = new decimal(price),
+            Side = side,
+            Time = DateTimeOffset.FromUnixTimeMilliseconds(mts),
+        };
+
+        return trade;
+    }
 }
