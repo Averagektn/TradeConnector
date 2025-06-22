@@ -27,7 +27,6 @@ public class Candle
     /// </summary>
     public decimal ClosePrice { get; set; }
 
-
     /// <summary>
     /// Partial (Общая сумма сделок)
     /// </summary>

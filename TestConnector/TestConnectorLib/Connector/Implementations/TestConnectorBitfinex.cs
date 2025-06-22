@@ -49,17 +49,17 @@ public class TestConnectorBitfinex : ITestConnector
 
         if (from.HasValue)
         {
-            request.AddQueryParameter("start", from.Value.ToUnixTimeMilliseconds());
+            _ = request.AddQueryParameter("start", from.Value.ToUnixTimeMilliseconds());
         }
 
         if (to.HasValue)
         {
-            request.AddQueryParameter("end", to.Value.ToUnixTimeMilliseconds());
+            _ = request.AddQueryParameter("end", to.Value.ToUnixTimeMilliseconds());
         }
 
         if (count.HasValue)
         {
-            request.AddQueryParameter("limit", count.Value);
+            _ = request.AddQueryParameter("limit", count.Value);
         }
 
         RestResponse response = await client.ExecuteAsync(request);
@@ -178,12 +178,12 @@ public class TestConnectorBitfinex : ITestConnector
                     WebSocketReceiveResult result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
                     string chunk = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    messageBuilder.Append(chunk);
+                    _ = messageBuilder.Append(chunk);
 
                     if (result.EndOfMessage)
                     {
                         string fullMessage = messageBuilder.ToString();
-                        messageBuilder.Clear();
+                        _ = messageBuilder.Clear();
 
                         JsonNode node = JsonSerializer.Deserialize<JsonNode>(fullMessage)!;
 
@@ -206,12 +206,12 @@ public class TestConnectorBitfinex : ITestConnector
                 }
                 catch (ObjectDisposedException)
                 {
-                    _subscribedCandlePairs.Remove(pair);
+                    _ = _subscribedCandlePairs.Remove(pair);
                 }
                 catch (InvalidOperationException)
                 {
                     ws.Dispose();
-                    _subscribedCandlePairs.Remove(pair);
+                    _ = _subscribedCandlePairs.Remove(pair);
                 }
             }
         });
@@ -222,7 +222,7 @@ public class TestConnectorBitfinex : ITestConnector
         if (_subscribedCandlePairs.TryGetValue(pair, out ClientWebSocket? ws))
         {
             ws.Dispose();
-            _subscribedCandlePairs.Remove(pair);
+            _ = _subscribedCandlePairs.Remove(pair);
         }
     }
 
@@ -279,12 +279,12 @@ public class TestConnectorBitfinex : ITestConnector
                     WebSocketReceiveResult result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
                     string chunk = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    messageBuilder.Append(chunk);
+                    _ = messageBuilder.Append(chunk);
 
                     if (result.EndOfMessage)
                     {
                         string fullMessage = messageBuilder.ToString();
-                        messageBuilder.Clear();
+                        _ = messageBuilder.Clear();
 
                         JsonNode node = JsonSerializer.Deserialize<JsonNode>(fullMessage)!;
 
@@ -313,12 +313,12 @@ public class TestConnectorBitfinex : ITestConnector
                 }
                 catch (ObjectDisposedException)
                 {
-                    _subscribedTradePairs.Remove(pair);
+                    _ = _subscribedTradePairs.Remove(pair);
                 }
                 catch (InvalidOperationException)
                 {
                     ws.Dispose();
-                    _subscribedTradePairs.Remove(pair);
+                    _ = _subscribedTradePairs.Remove(pair);
                 }
             }
         });
@@ -329,7 +329,7 @@ public class TestConnectorBitfinex : ITestConnector
         if (_subscribedTradePairs.TryGetValue(pair, out ClientWebSocket? ws))
         {
             ws.Dispose();
-            _subscribedTradePairs.Remove(pair);
+            _ = _subscribedTradePairs.Remove(pair);
         }
     }
 

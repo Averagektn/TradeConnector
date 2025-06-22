@@ -1,7 +1,8 @@
-﻿using TestConnectorUI.ViewModels.Base;
+﻿using TestConnectorLib.Connector.Interfaces;
+
+using TestConnectorUI.ViewModels.Base;
 
 namespace TestConnectorUI.ViewModels;
-internal class ConverterViewModel : BaseViewModel
+public class ConverterViewModel(ITestConnector testConnector) : BaseViewModel
 {
-
 }

@@ -27,10 +27,8 @@ public class Trade
     /// </summary>
     public DateTimeOffset Time { get; set; }
 
-
     /// <summary>
     /// Id трейда
     /// </summary>
     public string Id { get; set; }
-
 }
