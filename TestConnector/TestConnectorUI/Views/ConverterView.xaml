@@ -17,26 +17,66 @@
         <StackPanel Grid.Column="0" Margin="10">
             <StackPanel>
                 <TextBlock Text="BTC" HorizontalAlignment="Right"/>
-                <xctk:IntegerUpDown Value="1"/>
+                <xctk:DecimalUpDown Value="{Binding BtcCount}"/>
             </StackPanel>
 
             <StackPanel>
                 <TextBlock Text="XRP" HorizontalAlignment="Right"/>
-                <xctk:IntegerUpDown Value="15000"/>
+                <xctk:DecimalUpDown Value="{Binding XrpCount}"/>
             </StackPanel>
 
             <StackPanel>
                 <TextBlock Text="XMR" HorizontalAlignment="Right"/>
-                <xctk:IntegerUpDown Value="50"/>
+                <xctk:DecimalUpDown Value="{Binding XmrCount}"/>
             </StackPanel>
 
             <StackPanel>
                 <TextBlock Text="DASH" HorizontalAlignment="Right"/>
-                <xctk:IntegerUpDown Value="30"/>
+                <xctk:DecimalUpDown Value="{Binding DashCount}"/>
             </StackPanel>
 
-            <TextBlock Text="Total: "/>
-            <TextBlock Text="{Binding A, Mode=TwoWay}"/>
+            <DataGrid ItemsSource="{Binding Currencies}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Currency" Binding="{Binding CurrencyType}"/>
+                    <DataGridTextColumn Header="Btc" Binding="{Binding Btc}"/>
+                    <DataGridTextColumn Header="Xmr" Binding="{Binding Xmr}"/>
+                    <DataGridTextColumn Header="Xrp" Binding="{Binding Xrp}"/>
+                    <DataGridTextColumn Header="Dash" Binding="{Binding Dash}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Margin="10">
+            <TextBlock Text="REST" HorizontalAlignment="Center"/>
+            <TextBlock Text="BTCUSD" HorizontalAlignment="Center"/>
+            <TextBlock Text="Candles" HorizontalAlignment="Center"/>
+            <DataGrid ItemsSource="{Binding Candles}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Pair" Binding="{Binding Pair}"/>
+                    <DataGridTextColumn Header="Open price" Binding="{Binding OpenPrice}"/>
+                    <DataGridTextColumn Header="Close price" Binding="{Binding ClosePrice}"/>
+                    <DataGridTextColumn Header="Low price" Binding="{Binding LowPrice}"/>
+                    <DataGridTextColumn Header="High price" Binding="{Binding HighPrice}"/>
+                    <DataGridTextColumn Header="Open time" Binding="{Binding OpenTime}"/>
+                    <DataGridTextColumn Header="Total price" Binding="{Binding TotalPrice}"/>
+                    <DataGridTextColumn Header="Total volume" Binding="{Binding TotalVolume}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Button Command=""/>
+
+            <TextBlock Text="WebSocket" HorizontalAlignment="Center"/>
+            <TextBlock Text="BTCUSD" HorizontalAlignment="Center"/>
+            <TextBlock Text="Trades" HorizontalAlignment="Center"/>
+            <DataGrid ItemsSource="{Binding Trades}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id" Binding="{Binding Id}"/>
+                    <DataGridTextColumn Header="Pair" Binding="{Binding Pair}"/>
+                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount}"/>
+                    <DataGridTextColumn Header="Price" Binding="{Binding Price}"/>
+                    <DataGridTextColumn Header="Side" Binding="{Binding Side}"/>
+                    <DataGridTextColumn Header="Time" Binding="{Binding Time}"/>
+                </DataGrid.Columns>
+            </DataGrid>
         </StackPanel>
     </Grid>
 </UserControl>

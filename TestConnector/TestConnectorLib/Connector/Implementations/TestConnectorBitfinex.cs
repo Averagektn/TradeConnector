@@ -76,9 +76,9 @@ public class TestConnectorBitfinex : ITestConnector
                 Candle candle = GetCandleFromJson(item, pair);
 
                 res.Add(candle);
-
-                return res;
             }
+
+            return res;
         }
 
         throw new RequestFailedException($"Failed with {response.StatusCode} {response.ErrorMessage} {response.ErrorException}");
@@ -105,9 +105,9 @@ public class TestConnectorBitfinex : ITestConnector
                 Trade trade = GetTradeFromJson(item, pair);
 
                 res.Add(trade);
-
-                return res;
             }
+
+            return res;
         }
 
         throw new RequestFailedException($"Failed with {response.StatusCode} {response.ErrorMessage} {response.ErrorException}");
