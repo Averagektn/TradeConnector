@@ -2,6 +2,7 @@
 
 namespace TestConnectorLib.Connector.Interfaces;
 
+// Could be splitted into Ws and Rest interfaces, but I left it as it is
 public interface ITestConnector
 {
     #region Rest

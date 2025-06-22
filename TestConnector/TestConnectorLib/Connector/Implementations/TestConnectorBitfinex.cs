@@ -11,7 +11,8 @@ using TestConnectorLib.Model;
 
 namespace TestConnectorLib.Connector.Implementations;
 
-public class TestConnectorBitfinex : ITestConnector
+// Could contain RestClient and WsClient implementations, but i didn't do it to leave provided interface (to not break contract)
+public class TestConnectorBitfinex : ITestConnector, ITickerConnector
 {
     public event Action<Trade>? NewBuyTrade;
     public event Action<Trade>? NewSellTrade;
@@ -381,5 +382,40 @@ public class TestConnectorBitfinex : ITestConnector
         };
 
         return trade;
+    }
+
+    public async Task<Ticker> GetTickerInfoAsync(string pair)
+    {
+        using var client = new RestClient("https://api-pub.bitfinex.com/v2");
+
+        RestRequest request = new RestRequest($"ticker/{pair}", Method.Get)
+            .AddHeader("Accept", "application/json");
+
+        RestResponse response = await client.ExecuteAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            string json = response.Content!;
+
+            JsonArray data = JsonSerializer.Deserialize<JsonArray>(json)!;
+
+            var ticker = new Ticker()
+            {
+                Bid = data[0]!.GetValue<decimal>(),
+                BidSize = data[1]!.GetValue<decimal>(),
+                Ask = data[2]!.GetValue<decimal>(),
+                AskSize = data[3]!.GetValue<decimal>(),
+                DailyChange = data[4]!.GetValue<decimal>(),
+                DailyChangeRelative = data[5]!.GetValue<decimal>(),
+                LastPrice = data[6]!.GetValue<decimal>(),
+                Volume = data[7]!.GetValue<decimal>(),
+                High = data[8]!.GetValue<decimal>(),
+                Low = data[9]!.GetValue<decimal>(),
+            };
+
+            return ticker;
+        }
+
+        throw new RequestFailedException($"Failed with {response.StatusCode} {response.ErrorMessage} {response.ErrorException}");
     }
 }
